@@ -278,6 +278,8 @@ class XBMCNFO(PlexAgent):
         movie_name = get_movie_name_from_folder(folder_path, False)
 
         if not preferences['localmediaagent']:
+            jpg_poster_names = []
+
             poster_names = get_related_files(path1, '-poster.jpg')
             poster_names.extend([
                 # Frodo
@@ -285,34 +287,75 @@ class XBMCNFO(PlexAgent):
                 '{movie}-poster.jpg'.format(movie=movie_name),
                 os.path.join(folder_path, 'poster.jpg'),
             ])
+
+
             if is_dvd:
-                poster_names.append(os.path.join(folder_path_dvd, 'poster.jpg'))
+                poster_names.append(os.path.join(folder_path_dvd, 'poster.png'))
             # Eden
             poster_names.extend(get_related_files(path1, '.tbn'))
-            poster_names.append('{path}/folder.jpg'.format(path=folder_path))
+            poster_names.append('{path}/folder.png'.format(path=folder_path))
             if is_dvd:
-                poster_names.append(os.path.join(folder_path_dvd, 'folder.jpg'))
+                poster_names.append(os.path.join(folder_path_dvd, 'folder.png'))
             # DLNA
-            poster_names.extend(get_related_files(path1, '.jpg'))
+            poster_names.extend(get_related_files(path1, '.png'))
             # Others
-            poster_names.append('{path}/cover.jpg'.format(path=folder_path))
+            poster_names.append('{path}/cover.png'.format(path=folder_path))
             if is_dvd:
-                poster_names.append(os.path.join(folder_path_dvd, 'cover.jpg'))
-            poster_names.append('{path}/default.jpg'.format(path=folder_path))
+                poster_names.append(os.path.join(folder_path_dvd, 'cover.png'))
+            poster_names.append('{path}/default.png'.format(path=folder_path))
             if is_dvd:
-                poster_names.append(os.path.join(folder_path_dvd, 'default.jpg'))
-            poster_names.append('{path}/movie.jpg'.format(path=folder_path))
+                poster_names.append(os.path.join(folder_path_dvd, 'default.png'))
+            poster_names.append('{path}/movie.png'.format(path=folder_path))
             if is_dvd:
-                poster_names.append(os.path.join(folder_path_dvd, 'movie.jpg'))
+                poster_names.append(os.path.join(folder_path_dvd, 'movie.png'))
+
+            
+
+            if is_dvd:
+                jpg_poster_names.append(os.path.join(folder_path_dvd, 'poster.jpg'))
+            # Eden
+            jpg_poster_names.extend(get_related_files(path1, '.tbn'))
+            jpg_poster_names.append('{path}/folder.jpg'.format(path=folder_path))
+            if is_dvd:
+                jpg_poster_names.append(os.path.join(folder_path_dvd, 'folder.jpg'))
+            # DLNA
+            jpg_poster_names.extend(get_related_files(path1, '.jpg'))
+            # Others
+            jpg_poster_names.append('{path}/cover.jpg'.format(path=folder_path))
+            if is_dvd:
+                jpg_poster_names.append(os.path.join(folder_path_dvd, 'cover.jpg'))
+            jpg_poster_names.append('{path}/default.jpg'.format(path=folder_path))
+            if is_dvd:
+                jpg_poster_names.append(os.path.join(folder_path_dvd, 'default.jpg'))
+            jpg_poster_names.append('{path}/movie.jpg'.format(path=folder_path))
+            if is_dvd:
+                jpg_poster_names.append(os.path.join(folder_path_dvd, 'movie.jpg'))
+
+            
 
             # check possible poster file locations
             poster_filename = check_file_paths(poster_names, 'poster')
+            jpg_poster_filename = check_file_paths(jpg_poster_names, 'poster')
 
-            if poster_filename:
-                poster_data = load_file(poster_filename)
+            if poster_filename or jpg_poster_filename:
+                
                 for key in metadata.posters.keys():
                     del metadata.posters[key]
-                metadata.posters[poster_filename] = MediaProxy(poster_data)
+                
+                for key in metadata.art.keys():
+                    del metadata.art[key]
+                
+                if poster_filename:
+                    poster_data = load_file(poster_filename)
+                    metadata.posters[poster_filename] = MediaProxy(poster_data)
+
+                if jpg_poster_filename:
+                    jpg_poster_data = load_file(jpg_poster_filename)
+                    metadata.posters[jpg_poster_filename] = MediaProxy(jpg_poster_data)
+                    metadata.art[jpg_poster_filename] = MediaProxy(jpg_poster_data)
+
+                if poster_filename:
+                    metadata.art[poster_filename] = MediaProxy(poster_data)
 
             fanart_names = get_related_files(path1, '-fanart.jpg')
             fanart_names.extend([
@@ -339,8 +382,6 @@ class XBMCNFO(PlexAgent):
 
             if fanart_filename:
                 fanart_data = load_file(fanart_filename)
-                for key in metadata.art.keys():
-                    del metadata.art[key]
                 metadata.art[fanart_filename] = MediaProxy(fanart_data)
 
         nfo_names = get_related_files(path1, '.nfo')
